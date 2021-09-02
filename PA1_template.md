@@ -5,9 +5,6 @@ output:
     keep_md: true
 ---
 
-## Turn of warnings
-knitr::opts_chunk$set(warning=FALSE)
-
 
 ## Loading and preprocessing the data
 
@@ -205,6 +202,81 @@ ST %>% select(time, steps) %>% filter(steps==max(ST$steps))
 ```
 
 ## Imputing missing values
+
+```r
+# 1. Total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+# table for dplyr
+ACT <- tbl_df(activity)
+# find the column
+ACT %>% filter(is.na(steps)) %>% summarize(missing_values = n())
+```
+
+```
+## # A tibble: 1 x 1
+##   missing_values
+##            <int>
+## 1           2304
+```
+
+```r
+# 2. Fill in all of the missing values in the dataset.
+
+# values without NA are imputed in a new column
+activity$CompleteSteps <- ifelse(is.na(activity$steps), round(StepsPerTime$steps[match(activity$interval, StepsPerTime$interval)],0), activity$steps)
+
+# 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+# new dataset activityFull
+activityFull <- data.frame(steps=activity$CompleteSteps, interval=activity$interval, date=activity$date)
+# see first 10 values of the new dataset
+head(activityFull, n=10)
+```
+
+```
+##    steps interval       date
+## 1      2        0 2012-10-01
+## 2      0        5 2012-10-01
+## 3      0       10 2012-10-01
+## 4      0       15 2012-10-01
+## 5      0       20 2012-10-01
+## 6      2       25 2012-10-01
+## 7      1       30 2012-10-01
+## 8      1       35 2012-10-01
+## 9      0       40 2012-10-01
+## 10     1       45 2012-10-01
+```
+
+```r
+# 4.  Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
+
+# prepare data
+StepsPerDayFull <- aggregate(activityFull$steps, list(activityFull$date), FUN=sum)
+colnames(StepsPerDayFull) <- c("Date", "Steps")
+# draw the histogram
+g <- ggplot(StepsPerDayFull, aes(Steps))
+g+geom_histogram(boundary=0, binwidth=2500, col="darkblue", fill="lightblue")+ggtitle("Histogram of steps per day")+xlab("Steps")+ylab("Frequency")+theme(plot.title = element_text(face="bold", size=12))+scale_x_continuous(breaks=seq(0,25000,2500))+scale_y_continuous(breaks=seq(0,26,2))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+```r
+# Mean
+mean(StepsPerDayFull$Steps)
+```
+
+```
+## [1] 10765.64
+```
+
+```r
+#Median
+median(StepsPerDayFull$Steps)
+```
+
+```
+## [1] 10762
+```
 
 
 
