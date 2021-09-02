@@ -281,3 +281,45 @@ median(StepsPerDayFull$Steps)
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
+```r
+# 1 . Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+
+# Create variable with date in correct format
+activityFull$RealDate <- as.Date(activityFull$date, format = "%Y-%m-%d")
+# create a variable with weekdays name
+activityFull$weekday <- weekdays(activityFull$RealDate)
+# create a new variable indicating weekday or weekend
+activityFull$DayType <- ifelse(activityFull$weekday=='Saturday' | activityFull$weekday=='Sunday', 'weekend','weekday')
+# see first 10 values
+head(activityFull, n=10)
+```
+
+```
+##    steps interval       date   RealDate weekday DayType
+## 1      2        0 2012-10-01 2012-10-01  Monday weekday
+## 2      0        5 2012-10-01 2012-10-01  Monday weekday
+## 3      0       10 2012-10-01 2012-10-01  Monday weekday
+## 4      0       15 2012-10-01 2012-10-01  Monday weekday
+## 5      0       20 2012-10-01 2012-10-01  Monday weekday
+## 6      2       25 2012-10-01 2012-10-01  Monday weekday
+## 7      1       30 2012-10-01 2012-10-01  Monday weekday
+## 8      1       35 2012-10-01 2012-10-01  Monday weekday
+## 9      0       40 2012-10-01 2012-10-01  Monday weekday
+## 10     1       45 2012-10-01 2012-10-01  Monday weekday
+```
+
+```r
+# 2. Make a panel plot containing a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+
+# create table with steps per time across weekdaydays or weekend days
+StepsPerTimeDT <- aggregate(steps~interval+DayType,data=activityFull,FUN=mean,na.action=na.omit)
+# variable time (more comprensible for the graph axis)
+StepsPerTimeDT$time <- StepsPerTime$interval/100
+# draw the line plot
+j <- ggplot(StepsPerTimeDT, aes(time, steps))
+j+geom_line(col="darkred")+ggtitle("Average steps per time interval: weekdays vs. weekends")+xlab("Time")+ylab("Steps")+theme(plot.title = element_text(face="bold", size=12))+facet_grid(DayType ~ .)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
