@@ -5,7 +5,8 @@ output:
     keep_md: true
 ---
 
-
+## Turn of warnings
+knitr::opts_chunk$set(warning=FALSE)
 
 
 ## Loading and preprocessing the data
@@ -167,6 +168,41 @@ median(StepsPerDay$Steps, na.rm=TRUE)
 ## What is the average daily activity pattern?
 
 
+```r
+# 1. Make a time series plot
+StepsPerTime <- aggregate(steps~interval,data=activity,FUN=mean,na.action=na.omit)
+# variable time (more comprensible for the graph axis)
+StepsPerTime$time <- StepsPerTime$interval/100
+# draw the line plot
+h <- ggplot(StepsPerTime, aes(time, steps))
+h+geom_line(col="blue")+ggtitle("Average steps per time interval")+xlab("Time")+ylab("Steps")+theme(plot.title = element_text(face="bold", size=11))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
+# 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+# table for dplyr
+ST <- tbl_df(StepsPerTime)
+```
+
+```
+## Warning: `tbl_df()` was deprecated in dplyr 1.0.0.
+## Please use `tibble::as_tibble()` instead.
+```
+
+```r
+# find the column
+ST %>% select(time, steps) %>% filter(steps==max(ST$steps))
+```
+
+```
+## # A tibble: 1 x 2
+##    time steps
+##   <dbl> <dbl>
+## 1  8.35  206.
+```
 
 ## Imputing missing values
 
